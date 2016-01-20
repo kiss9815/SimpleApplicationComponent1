@@ -14,6 +14,7 @@ public class OtherActivity extends AppCompatActivity {
 
     TextView messageView;
     EditText edit_result;
+    public static final String EXTRA_PERSON = "person";
     public static final String EXTRA_MESSAGE = "message"; // 인텐트 받는 곳의 상수는 받는곳에서 정의, 코드안에는 상수값을 넣지말고 정의를 하자
     public static final String RESULT_MESSAGE = "result";
     @Override
@@ -27,9 +28,11 @@ public class OtherActivity extends AppCompatActivity {
         edit_result = (EditText)findViewById(R.id.edit_output);
 
         Intent intent = getIntent();
-        String message = intent.getStringExtra(EXTRA_MESSAGE);
+//        String message = intent.getStringExtra(EXTRA_MESSAGE);
 
-        messageView.setText(message);
+        Person p = (Person)intent.getSerializableExtra(EXTRA_PERSON);
+
+        messageView.setText(p.message);
 
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
