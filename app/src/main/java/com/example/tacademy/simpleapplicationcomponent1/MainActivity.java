@@ -1,8 +1,11 @@
 package com.example.tacademy.simpleapplicationcomponent1;
 
+import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -65,16 +68,16 @@ public class MainActivity extends AppCompatActivity {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (myService!=null){
+                if (myService != null) {
 
-                        try {
-                            int count = 0;
-                            count = myService.getCount();
-                            Toast.makeText(MainActivity.this, "count : " + count, Toast.LENGTH_SHORT).show();
-                        } catch (RemoteException e) {
-                            e.printStackTrace();
-                        }
+                    try {
+                        int count = 0;
+                        count = myService.getCount();
+                        Toast.makeText(MainActivity.this, "count : " + count, Toast.LENGTH_SHORT).show();
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
                     }
+                }
             }
         });
 
@@ -101,9 +104,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter filter = new IntentFilter(MyService.ACTION_TEN_ZERO);
+        registerReceiver(mReceiver, filter);
+    }
+
+    BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int count = intent.getIntExtra("count", 0);
+            Toast.makeText(MainActivity.this, "Activity received Count : " + count, Toast.LENGTH_SHORT).show();
+            setResultCode(Activity.RESULT_OK);
+        }
+    };
+
+    @Override
     protected void onStop() {
         super.onStop();
         unbindService(mConnection);
+        unregisterReceiver(mReceiver);
     }
 
     @Override

@@ -1,7 +1,11 @@
 package com.example.tacademy.simpleapplicationcomponent1;
 
+import android.app.Activity;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -11,6 +15,8 @@ public class MyService extends Service {
 
 
     private static final String TAG = "MyService";
+    public static final String ACTION_TEN_ZERO = "com.example.tacademy.simpleapplicationcomponent1.action.TEN_ZERO";
+
     public MyService() {
     }
 
@@ -47,8 +53,22 @@ public class MyService extends Service {
             @Override
             public void run() {
                 while (isRunning){
-
                     Log.i(TAG, "count : " + mCount);
+                    if(mCount %10 ==0){
+                        Intent intent = new Intent(ACTION_TEN_ZERO);
+                        intent.putExtra("count", mCount);
+//                        sendBroadcast(intent);
+                        sendOrderedBroadcast(intent, null, new BroadcastReceiver() {
+                            @Override
+                            public void onReceive(Context context, Intent intent) {
+                                int code = getResultCode();
+                                if ( code == Activity.RESULT_CANCELED){
+                                    Toast.makeText(context, "MyService : " + mCount, Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }, null, Activity.RESULT_CANCELED, null, null);
+                    }
+
                     mCount++;
                     try{
                         Thread.sleep(1000);
@@ -58,7 +78,23 @@ public class MyService extends Service {
                 }
             }
         }).start();
+
+        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+
+        registerReceiver(mScreenReceiver, filter);
     }
+
+    BroadcastReceiver mScreenReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
+                Log.i(TAG, "Screen ON .....");
+            } else if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+                Log.i(TAG, "Screen OFF ....");
+            }
+        }
+    };
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -79,5 +115,6 @@ public class MyService extends Service {
         super.onDestroy();
         Toast.makeText(this, "onDestroy..." , Toast.LENGTH_SHORT).show();
         isRunning = false;
+        unregisterReceiver(mScreenReceiver);
     }
 }
