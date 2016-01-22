@@ -3,6 +3,7 @@ package com.example.tacademy.simpleapplicationcomponent1;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -13,10 +14,24 @@ public class MyService extends Service {
     public MyService() {
     }
 
+    class MyServiceBinder extends IMyService.Stub{
+
+        @Override
+        public int getCount() throws RemoteException {
+            return mCount;
+        }
+    }
+
+    MyServiceBinder mBinder;
+
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
+       if(mBinder ==null){
+           mBinder = new MyServiceBinder();
+       }
+        return mBinder;
+
+
     }
     int mCount =0;
     boolean isRunning = false;
